@@ -1,3 +1,4 @@
+import { resolveCliArgsFromVSCodeExecutablePath } from "@vscode/test-electron";
 import { fromMarkdown } from "mdast-util-from-markdown";
 // import { inspect } from "unist-util-inspect";
 import * as vscode from "vscode";
@@ -53,11 +54,15 @@ const getRange = (
   ) {
     return;
   }
-  if (/^[a-zA-Z0-9]+(->|-->|-->>|-x|--x|-\)|--\))/.test(trimed)) {
-    const startResult = lineChars.match(/[a-zA-Z0-9]/);
+  if (/(->|-->|-->>|-x|--x|-\)|--\))/.test(trimed)) {
+    const startResult = lineChars.match(/[^\s]/);
     const endResult = lineChars.match(/\s*$/);
-    if (startResult?.index && endResult?.index) {
-      console.debug(`"ln: ${codeBlockInnerLine}, spaces: ${startResult.index}`);
+    // console.log("start", startResult, "end", endResult);
+    if (
+      typeof startResult?.index === "number" &&
+      typeof endResult?.index === "number"
+    ) {
+      // console.debug(`"ln: ${codeBlockInnerLine}, spaces: ${startResult.index}`);
       const range = new vscode.Range(
         new vscode.Position(
           codeBlockStartLine + codeBlockInnerLine,
@@ -75,8 +80,6 @@ const getRange = (
 
 const decorate = (openEditor: vscode.TextEditor) => {
   const tree = fromMarkdown(openEditor.document.getText());
-  // console.debug(tree);
-  // console.debug(inspect(tree));
 
   tree.children.forEach((content) => {
     if (
@@ -84,6 +87,14 @@ const decorate = (openEditor: vscode.TextEditor) => {
       content.lang === language.mermaid
     ) {
       const codeBlockLines = content.value.split("\n");
+
+      const isEnabled = codeBlockLines
+        .map((codeBlockLine) => codeBlockLine.trimLeft())
+        .some((trimedLine) => trimedLine.startsWith("autonumber"));
+      if (!isEnabled) {
+        openEditor.setDecorations(decorationType, []);
+        return;
+      }
 
       const decorationOptions: vscode.DecorationOptions[] = [];
       codeBlockLines.forEach((lineChars, codeBlockInnerLine) => {
