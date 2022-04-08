@@ -88,8 +88,15 @@ const decorate = (openEditor: vscode.TextEditor) => {
     ) {
       const codeBlockLines = content.value.split("\n");
 
-      const isEnabled = codeBlockLines
-        .map((codeBlockLine) => codeBlockLine.trimLeft())
+      const trimedLefts = codeBlockLines
+        .map((codeBlockLine) => codeBlockLine.trimLeft());
+      const isSequenceDiagram = trimedLefts
+        .some((trimedLine) => trimedLine.startsWith(mermaid_type.sequenceDiagram));
+      if (!isSequenceDiagram) {
+        openEditor.setDecorations(decorationType, []);
+        return;
+      }
+      const isEnabled = trimedLefts
         .some((trimedLine) => trimedLine.startsWith("autonumber"));
       if (!isEnabled) {
         openEditor.setDecorations(decorationType, []);
