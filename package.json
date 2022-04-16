@@ -5,19 +5,40 @@
   "engines": {
     "vscode": "^1.66.0"
   },
-  "displayName": "mermaid-editor-sequence-number",
-  "description": "activate sequential number for mermaid editor",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "displayName": "Mermaid editor sequence number",
+  "description": "decorate sequential number for mermaid editor",
   "categories": [
     "Other"
   ],
   "keywords": [
     "mermaid"
   ],
+  "galleryBanner": {
+    "color": "#C80000",
+    "theme": "dark"
+  },
+  "preview": true,
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "languages": [
+      {
+        "id": "mermaid",
+        "extensions": [
+          ".markdown"
+        ]
+      }
+    ]
+  },
   "activationEvents": [
     "onLanguage:markdown"
   ],
+  "badges": [],
+  "markdown": "github",
+  "qna": "marketplace",
+  "extensionPack": [],
+  "extensionDependencies": [],
+  "extensionKind": [],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
@@ -43,5 +64,14 @@
   },
   "dependencies": {
     "mdast-util-from-markdown": "^1.2.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/kkenya/mermaid-editor-sequence-number/issues",
+    "email": "3982ne@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kkenya/mermaid-editor-sequence-number.git"
+  },
+  "homepage": "https://github.com/kkenya/mermaid-editor-sequence-number/blob/main/README.md"
 }
