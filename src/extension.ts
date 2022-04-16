@@ -1,31 +1,31 @@
-import { fromMarkdown } from "mdast-util-from-markdown";
-import * as vscode from "vscode";
+import { fromMarkdown } from 'mdast-util-from-markdown';
+import * as vscode from 'vscode';
 
 const LIMIT = 1000;
-const MARKDOWN_LANGUAGE_ID = "markdown";
+const MARKDOWN_LANGUAGE_ID = 'markdown';
 const DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
   before: {
-    color: "#000",
-    backgroundColor: "#FFF",
+    color: '#000',
+    backgroundColor: '#FFF',
     textDecoration: `;
       font-size: 0.8em;
       border-radius: 1em;
       padding: 0 0.2em;',
     `,
-    margin: "0 0.5em;",
+    margin: '0 0.5em;',
   },
 });
 const MDAST = {
-  type: "code",
-  language: "mermaid",
+  type: 'code',
+  language: 'mermaid',
 } as const;
 const MERMAID = {
   sequence: {
-    diagram: "sequenceDiagram",
-    autonumber: "autonumber",
-    comment: "%%",
-    participant: "participant",
-    actor: "actor",
+    diagram: 'sequenceDiagram',
+    autonumber: 'autonumber',
+    comment: '%%',
+    participant: 'participant',
+    actor: 'actor',
   },
 } as const;
 
@@ -39,7 +39,12 @@ const resetDecorators = (editor: vscode.TextEditor) => {
   editor.setDecorations(DECORATION_TYPE, []);
 };
 
-const getMesseagePosition = (line: string) => {
+const getMesseagePosition = (
+  line: string
+): {
+  start: number;
+  end: number;
+} | void => {
   const trimed = line.trim();
   if (
     trimed.length === 0 ||
@@ -53,8 +58,8 @@ const getMesseagePosition = (line: string) => {
     const startResult = line.match(/[^\s]/);
     const endResult = line.match(/\s*$/);
     if (
-      typeof startResult?.index === "number" &&
-      typeof endResult?.index === "number"
+      typeof startResult?.index === 'number' &&
+      typeof endResult?.index === 'number'
     ) {
       return {
         start: startResult.index,
@@ -72,7 +77,7 @@ const decorate = (editor: vscode.TextEditor) => {
     if (content.type !== MDAST.type || content.lang !== MDAST.language) {
       return;
     }
-    const lines = content.value.split("\n");
+    const lines = content.value.split('\n');
     const trimedLines = lines.map((line) => line.trim());
 
     const isSequenceDiagram = trimedLines.some((trimedLine) =>
@@ -94,7 +99,7 @@ const decorate = (editor: vscode.TextEditor) => {
 
     lines.forEach((line, numberOfLines) => {
       if (content.position === undefined) {
-        console.error("unexpected content");
+        console.error('unexpected content');
         return;
       }
       const position = getMesseagePosition(line);
@@ -138,6 +143,9 @@ export function activate(context: vscode.ExtensionContext) {
       const [openEditor] = vscode.window.visibleTextEditors.filter(
         (editor) => editor.document.uri === event.document.uri
       );
+      if (openEditor === undefined) {
+        return;
+      }
       decorate(openEditor);
     },
     null,
