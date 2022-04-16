@@ -1,11 +1,11 @@
 {
-  "name": "mermaid-sequential-number",
+  "name": "mermaid-editor-sequence-number",
   "version": "0.0.1",
   "publisher": "kkenya",
   "engines": {
     "vscode": "^1.66.0"
   },
-  "displayName": "mermaid-sequential-number",
+  "displayName": "mermaid-editor-sequence-number",
   "description": "activate sequential number for mermaid editor",
   "categories": [
     "Other"
