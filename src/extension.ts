@@ -3,16 +3,27 @@ import * as vscode from 'vscode';
 
 const LIMIT = 1000;
 const MARKDOWN_LANGUAGE_ID = 'markdown';
+const NUMBER_POSITION: 'before' | 'after' = 'after';
 const DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
-  before: {
-    color: '#000',
-    backgroundColor: '#FFF',
+  [NUMBER_POSITION]: {
     textDecoration: `;
       font-size: 0.8em;
       border-radius: 1em;
       padding: 0 0.2em;',
     `,
     margin: '0 0.5em;',
+  },
+  dark: {
+    [NUMBER_POSITION]: {
+      color: '#000',
+      backgroundColor: '#FFF',
+    },
+  },
+  light: {
+    [NUMBER_POSITION]: {
+      color: '#FFF',
+      backgroundColor: '#000',
+    },
   },
 });
 const MDAST = {
@@ -114,7 +125,7 @@ const decorate = (editor: vscode.TextEditor) => {
         decorationOptions.push({
           range,
           renderOptions: {
-            before: {
+            [NUMBER_POSITION]: {
               contentText: String(++numberOfSequence),
             },
           },
