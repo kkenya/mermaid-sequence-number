@@ -129,8 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
     decorate(editor);
   });
 
-  // FIXME: 必要か
-  const disposable = vscode.workspace.onDidChangeTextDocument(
+  vscode.workspace.onDidChangeTextDocument(
     (event) => {
       if (!isEnableExtention(event.document)) {
         return;
@@ -144,8 +143,6 @@ export function activate(context: vscode.ExtensionContext) {
     null,
     context.subscriptions
   );
-
-  context.subscriptions.push(disposable);
 }
 
 export function deactivate() {}
