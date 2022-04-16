@@ -1,24 +1,9 @@
-import { resolveCliArgsFromVSCodeExecutablePath } from "@vscode/test-electron";
 import { fromMarkdown } from "mdast-util-from-markdown";
-// import { inspect } from "unist-util-inspect";
 import * as vscode from "vscode";
 
-const MDADT_TYPE = {
-  codeBlock: "code",
-} as const;
-const language = {
-  mermaid: "mermaid",
-} as const;
-const mermaid_type = {
-  sequenceDiagram: "sequenceDiagram",
-} as const;
-const mermaid_identifier = {
-  comment: "%%",
-  participant: "participant",
-  actor: "actor",
-} as const;
-
-const decorationType = vscode.window.createTextEditorDecorationType({
+const LIMIT = 1000;
+const MARKDOWN_LANGUAGE_ID = "markdown";
+const DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
   before: {
     color: "#000",
     backgroundColor: "#FFF",
@@ -28,121 +13,127 @@ const decorationType = vscode.window.createTextEditorDecorationType({
       padding: 0 0.2em;',
     `,
     margin: "0 0.5em;",
-    // width: '1em;',
-    // height: '1em;'
   },
 });
+const MDAST = {
+  type: "code",
+  language: "mermaid",
+} as const;
+const MERMAID = {
+  sequence: {
+    diagram: "sequenceDiagram",
+    autonumber: "autonumber",
+    comment: "%%",
+    participant: "participant",
+    actor: "actor",
+  },
+} as const;
 
-const getRange = (
-  lineChars: string,
-  codeBlockStartLine: number,
-  codeBlockInnerLine: number
-) => {
-  const trimed = lineChars.trimLeft();
-  if (trimed.length === 0) {
-    return;
-  }
-  if (trimed.startsWith(mermaid_identifier.comment)) {
-    return;
-  }
-  if (trimed.startsWith(mermaid_type.sequenceDiagram)) {
-    return;
-  }
+const isEnableExtention = (document: vscode.TextDocument) => {
+  return (
+    document.languageId === MARKDOWN_LANGUAGE_ID && document.lineCount <= LIMIT
+  );
+};
+
+const resetDecorators = (editor: vscode.TextEditor) => {
+  editor.setDecorations(DECORATION_TYPE, []);
+};
+
+const getMesseagePosition = (line: string) => {
+  const trimed = line.trim();
   if (
-    trimed.startsWith(mermaid_identifier.participant) ||
-    trimed.startsWith(mermaid_identifier.actor)
+    trimed.length === 0 ||
+    trimed.startsWith(MERMAID.sequence.comment) ||
+    trimed.startsWith(MERMAID.sequence.participant) ||
+    trimed.startsWith(MERMAID.sequence.actor)
   ) {
     return;
   }
   if (/(->|-->|-->>|-x|--x|-\)|--\))/.test(trimed)) {
-    const startResult = lineChars.match(/[^\s]/);
-    const endResult = lineChars.match(/\s*$/);
-    // console.log("start", startResult, "end", endResult);
+    const startResult = line.match(/[^\s]/);
+    const endResult = line.match(/\s*$/);
     if (
       typeof startResult?.index === "number" &&
       typeof endResult?.index === "number"
     ) {
-      // console.debug(`"ln: ${codeBlockInnerLine}, spaces: ${startResult.index}`);
-      const range = new vscode.Range(
-        new vscode.Position(
-          codeBlockStartLine + codeBlockInnerLine,
-          startResult.index
-        ),
-        new vscode.Position(
-          codeBlockStartLine + codeBlockInnerLine,
-          endResult.index
-        )
-      );
-      return range;
+      return {
+        start: startResult.index,
+        end: endResult.index,
+      };
     }
   }
 };
 
-const decorate = (openEditor: vscode.TextEditor) => {
-  const tree = fromMarkdown(openEditor.document.getText());
+const decorate = (editor: vscode.TextEditor) => {
+  const ast = fromMarkdown(editor.document.getText());
 
-  tree.children.forEach((content) => {
-    if (
-      content.type === MDADT_TYPE.codeBlock &&
-      content.lang === language.mermaid
-    ) {
-      const codeBlockLines = content.value.split("\n");
-
-      const trimedLefts = codeBlockLines
-        .map((codeBlockLine) => codeBlockLine.trimLeft());
-      const isSequenceDiagram = trimedLefts
-        .some((trimedLine) => trimedLine.startsWith(mermaid_type.sequenceDiagram));
-      if (!isSequenceDiagram) {
-        openEditor.setDecorations(decorationType, []);
-        return;
-      }
-      const isEnabled = trimedLefts
-        .some((trimedLine) => trimedLine.startsWith("autonumber"));
-      if (!isEnabled) {
-        openEditor.setDecorations(decorationType, []);
-        return;
-      }
-
-      const decorationOptions: vscode.DecorationOptions[] = [];
-      codeBlockLines.forEach((lineChars, codeBlockInnerLine) => {
-        if (content.position === undefined) {
-          console.log("unexpected content");
-          return;
-        }
-        const range = getRange(
-          lineChars,
-          content.position.start.line,
-          codeBlockInnerLine
-        );
-        if (range) {
-          const numberOfSequence = decorationOptions.length + 1;
-          decorationOptions.push({
-            range,
-            renderOptions: {
-              before: {
-                contentText: String(numberOfSequence),
-              },
-            },
-          });
-        }
-      });
-      openEditor.setDecorations(decorationType, decorationOptions);
+  const decorationOptions: vscode.DecorationOptions[] = [];
+  ast.children.forEach((content) => {
+    if (content.type !== MDAST.type || content.lang !== MDAST.language) {
+      return;
     }
+    const lines = content.value.split("\n");
+    const trimedLines = lines.map((line) => line.trim());
+
+    const isSequenceDiagram = trimedLines.some((trimedLine) =>
+      trimedLine.startsWith(MERMAID.sequence.diagram)
+    );
+    if (!isSequenceDiagram) {
+      resetDecorators(editor);
+      return;
+    }
+    const isEnabled = trimedLines.some((trimedLine) =>
+      trimedLine.startsWith(MERMAID.sequence.autonumber)
+    );
+    if (!isEnabled) {
+      resetDecorators(editor);
+      return;
+    }
+
+    let numberOfSequence = 0;
+
+    lines.forEach((line, numberOfLines) => {
+      if (content.position === undefined) {
+        console.error("unexpected content");
+        return;
+      }
+      const position = getMesseagePosition(line);
+      if (position) {
+        const numberOfLinesInDocument =
+          content.position.start.line + numberOfLines;
+        const range = new vscode.Range(
+          new vscode.Position(numberOfLinesInDocument, position.start),
+          new vscode.Position(numberOfLinesInDocument, position.end)
+        );
+
+        decorationOptions.push({
+          range,
+          renderOptions: {
+            before: {
+              contentText: String(++numberOfSequence),
+            },
+          },
+        });
+      }
+    });
   });
+  editor.setDecorations(DECORATION_TYPE, decorationOptions);
 };
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.window.visibleTextEditors.forEach((editor) => {
-    if (editor.document.languageId !== "markdown") {
-      return null;
+    if (!isEnableExtention(editor.document)) {
+      return;
     }
+
     decorate(editor);
   });
 
+  // FIXME: 必要か
   const disposable = vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      if (event.document.languageId !== "markdown") {
-        return null;
+      if (!isEnableExtention(event.document)) {
+        return;
       }
 
       const [openEditor] = vscode.window.visibleTextEditors.filter(
