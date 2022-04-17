@@ -1,6 +1,6 @@
 {
   "name": "mermaid-sequence-number",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "kkenya",
   "engines": {
     "vscode": "^1.66.0"
@@ -65,7 +65,7 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
-  "icon": "./images/icon.png",
+  "icon": "images/icon.png",
   "bugs": {
     "url": "https://github.com/kkenya/mermaid-sequence-number/issues",
     "email": "3982ne@gmail.com"

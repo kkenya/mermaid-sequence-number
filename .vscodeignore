@@ -10,4 +10,4 @@ webpack.config.js
 **/.eslintrc.json
 **/*.map
 **/*.ts
-images/**
+docs/**
