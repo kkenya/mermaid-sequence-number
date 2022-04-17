@@ -15,10 +15,10 @@
     "mermaid"
   ],
   "galleryBanner": {
-    "color": "#C80000",
+    "color": "#adde78",
     "theme": "dark"
   },
-  "preview": true,
+  "preview": false,
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
