@@ -1,12 +1,12 @@
 {
-  "name": "mermaid-editor-sequence-number",
+  "name": "mermaid-sequence-number",
   "version": "0.0.1",
   "publisher": "kkenya",
   "engines": {
     "vscode": "^1.66.0"
   },
   "license": "SEE LICENSE IN LICENSE.txt",
-  "displayName": "Mermaid editor sequence number",
+  "displayName": "Mermaid sequence number",
   "description": "decorate sequential number for mermaid editor",
   "categories": [
     "Other"
@@ -66,12 +66,12 @@
     "mdast-util-from-markdown": "^1.2.0"
   },
   "bugs": {
-    "url": "https://github.com/kkenya/mermaid-editor-sequence-number/issues",
+    "url": "https://github.com/kkenya/mermaid-sequence-number/issues",
     "email": "3982ne@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kkenya/mermaid-editor-sequence-number.git"
+    "url": "https://github.com/kkenya/mermaid-sequence-number.git"
   },
-  "homepage": "https://github.com/kkenya/mermaid-editor-sequence-number/blob/main/README.md"
+  "homepage": "https://github.com/kkenya/mermaid-sequence-number/blob/main/README.md"
 }

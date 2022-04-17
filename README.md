@@ -1,4 +1,4 @@
-# mermaid-editor-sequence-number
+# mermaid-sequence-number
 
 Visual Studio Code's extention for [Mermaid](https://github.com/mermaid-js/mermaid).
 this extention decorate each line in editor when `autonumber` is turned on in the sequence diagram.
