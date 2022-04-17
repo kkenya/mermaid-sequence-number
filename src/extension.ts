@@ -40,6 +40,8 @@ const MERMAID = {
   },
 } as const;
 
+const arrowRe = /-(>|->|->>|x|-x|\)|-\))/;
+
 const isEnableExtention = (document: vscode.TextDocument) => {
   return (
     document.languageId === MARKDOWN_LANGUAGE_ID && document.lineCount <= LIMIT
@@ -51,32 +53,25 @@ const resetDecorators = (editor: vscode.TextEditor) => {
 };
 
 const getMesseagePosition = (
-  line: string
+  line: string,
+  trimedLeft: string
 ): {
   start: number;
   end: number;
 } | void => {
-  const trimed = line.trim();
   if (
-    trimed.length === 0 ||
-    trimed.startsWith(MERMAID.sequence.comment) ||
-    trimed.startsWith(MERMAID.sequence.participant) ||
-    trimed.startsWith(MERMAID.sequence.actor)
+    trimedLeft.length === 0 ||
+    trimedLeft.startsWith(MERMAID.sequence.comment) ||
+    trimedLeft.startsWith(MERMAID.sequence.participant) ||
+    trimedLeft.startsWith(MERMAID.sequence.actor)
   ) {
     return;
   }
-  if (/(->|-->|-->>|-x|--x|-\)|--\))/.test(trimed)) {
-    const startResult = line.match(/[^\s]/);
-    const endResult = line.match(/\s*$/);
-    if (
-      typeof startResult?.index === 'number' &&
-      typeof endResult?.index === 'number'
-    ) {
-      return {
-        start: startResult.index,
-        end: endResult.index,
-      };
-    }
+  if (arrowRe.test(trimedLeft)) {
+    return {
+      start: line.length - trimedLeft.length,
+      end: line.trimRight().length,
+    };
   }
 };
 
@@ -89,16 +84,16 @@ const decorate = (editor: vscode.TextEditor) => {
       return;
     }
     const lines = content.value.split('\n');
-    const trimedLines = lines.map((line) => line.trim());
+    const trimedLeftLines = lines.map((line) => line.trimLeft());
 
-    const isSequenceDiagram = trimedLines.some((trimedLine) =>
-      trimedLine.startsWith(MERMAID.sequence.diagram)
+    const isSequenceDiagram = trimedLeftLines.some((trimedLeftLine) =>
+      trimedLeftLine.startsWith(MERMAID.sequence.diagram)
     );
     if (!isSequenceDiagram) {
       resetDecorators(editor);
       return;
     }
-    const isEnabled = trimedLines.some((trimedLine) =>
+    const isEnabled = trimedLeftLines.some((trimedLine) =>
       trimedLine.startsWith(MERMAID.sequence.autonumber)
     );
     if (!isEnabled) {
@@ -113,7 +108,11 @@ const decorate = (editor: vscode.TextEditor) => {
         console.error('unexpected content');
         return;
       }
-      const position = getMesseagePosition(line);
+      const trimedLeftLine = trimedLeftLines[numberOfLines];
+      if (trimedLeftLine === undefined) {
+        return;
+      }
+      const position = getMesseagePosition(line, trimedLeftLine);
       if (position) {
         const numberOfLinesInDocument =
           content.position.start.line + numberOfLines;
