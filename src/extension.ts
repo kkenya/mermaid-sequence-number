@@ -1,7 +1,10 @@
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import * as vscode from 'vscode';
 
-const VALID_LANGUAGE_IDS = ['markdown', 'mermaid'];
+const VALID_LANGUAGE_ID = {
+  markdown: 'markdown',
+  mermaid: 'mermaid',
+};
 const MAX_LIMIT = 1000;
 const DECORATION_POSITION: 'before' | 'after' = 'after';
 const DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
@@ -42,15 +45,11 @@ const MERMAID = {
 
 const arrowRe = /-(>|->|->>|x|-x|\)|-\))/;
 
-const isEnable = (document: vscode.TextDocument) => {
+const isEnabled = (document: vscode.TextDocument) => {
   return (
-    VALID_LANGUAGE_IDS.includes(document.languageId) &&
+    Object.values(VALID_LANGUAGE_ID).includes(document.languageId) &&
     document.lineCount <= MAX_LIMIT
   );
-};
-
-const resetDecorators = (editor: vscode.TextEditor) => {
-  editor.setDecorations(DECORATION_TYPE, []);
 };
 
 const getMesseagePosition = (
@@ -76,14 +75,6 @@ const getMesseagePosition = (
   }
 };
 
-const decorate = (editor: vscode.TextEditor) => {
-  if (editor.document.languageId === 'markdown') {
-    decorateMarkdown(editor);
-  } else if (editor.document.languageId) {
-    decorateMmd(editor);
-  }
-};
-
 type MessagePosition = {
   start: number;
   end: number;
@@ -91,25 +82,20 @@ type MessagePosition = {
   numberOfSequences: number;
 };
 
-const commonProcess = (
-  editor: vscode.TextEditor,
-  editorText: string
-): MessagePosition[] => {
-  const lines = editorText.split('\n');
+const getMessagePositions = (text: string): MessagePosition[] => {
+  const lines = text.split('\n');
   const trimedLeftLines = lines.map((line) => line.trimLeft());
 
   const isSequenceDiagram = trimedLeftLines.some((trimedLeftLine) =>
     trimedLeftLine.startsWith(MERMAID.sequence.diagram)
   );
   if (!isSequenceDiagram) {
-    resetDecorators(editor);
     return [];
   }
   const isEnabled = trimedLeftLines.some((trimedLine) =>
     trimedLine.startsWith(MERMAID.sequence.autonumber)
   );
   if (!isEnabled) {
-    resetDecorators(editor);
     return [];
   }
 
@@ -122,9 +108,8 @@ const commonProcess = (
     }
     const position = getMesseagePosition(line, trimedLeftLine);
     if (position) {
-      positions.push({
-        start: position.start,
-        end: position.end,
+      return positions.concat({
+        ...position,
         numberOfLines,
         numberOfSequences: ++numberOfSequences,
       });
@@ -134,30 +119,33 @@ const commonProcess = (
 };
 
 const decorateMarkdown = (editor: vscode.TextEditor) => {
+  const decorationOptions: vscode.DecorationOptions[] = [];
   const ast = fromMarkdown(editor.document.getText());
 
-  let decorationOptions: vscode.DecorationOptions[] = [];
   ast.children.forEach((content) => {
-    if (content.type !== MDAST.type || content.lang !== MDAST.language) {
+    const { position } = content;
+    if (
+      content.type !== MDAST.type ||
+      content.lang !== MDAST.language ||
+      position === undefined
+    ) {
       return;
     }
-    const messagePositions = commonProcess(editor, content.value);
+    const messagePositions = getMessagePositions(content.value);
+
     messagePositions.forEach(
       ({ start, end, numberOfLines, numberOfSequences }) => {
-        if (content.position === undefined) {
-          return;
-        }
-        const numberOfLinesInDocument =
-          content.position.start.line + numberOfLines;
+        const numberOfLinesInMarkdown = position.start.line + numberOfLines;
         const range = new vscode.Range(
-          new vscode.Position(numberOfLinesInDocument, start),
-          new vscode.Position(numberOfLinesInDocument, end)
+          new vscode.Position(numberOfLinesInMarkdown, start),
+          new vscode.Position(numberOfLinesInMarkdown, end)
         );
+
         decorationOptions.push({
           range,
           renderOptions: {
             [DECORATION_POSITION]: {
-              contentText: String(++numberOfSequences),
+              contentText: String(numberOfSequences),
             },
           },
         });
@@ -168,30 +156,39 @@ const decorateMarkdown = (editor: vscode.TextEditor) => {
 };
 
 const decorateMmd = (editor: vscode.TextEditor) => {
-  let decorationOptions: vscode.DecorationOptions[] = [];
-  const messagePositions = commonProcess(editor, editor.document.getText());
-  messagePositions.forEach(
+  const messagePositions = getMessagePositions(editor.document.getText());
+
+  const decorationOptions = messagePositions.map(
     ({ start, end, numberOfLines, numberOfSequences }) => {
       const range = new vscode.Range(
         new vscode.Position(numberOfLines, start),
         new vscode.Position(numberOfLines, end)
       );
-      decorationOptions.push({
+      return {
         range,
         renderOptions: {
           [DECORATION_POSITION]: {
-            contentText: String(++numberOfSequences),
+            contentText: String(numberOfSequences),
           },
         },
-      });
+      };
     }
   );
   editor.setDecorations(DECORATION_TYPE, decorationOptions);
 };
 
+const decorate = (editor: vscode.TextEditor): void => {
+  switch (editor.document.languageId) {
+    case VALID_LANGUAGE_ID.markdown:
+      return decorateMarkdown(editor);
+    case VALID_LANGUAGE_ID.mermaid:
+      return decorateMmd(editor);
+  }
+};
+
 export function activate(context: vscode.ExtensionContext) {
   vscode.window.visibleTextEditors.forEach((editor) => {
-    if (!isEnable(editor.document)) {
+    if (!isEnabled(editor.document)) {
       return;
     }
 
@@ -200,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      if (!isEnable(event.document)) {
+      if (!isEnabled(event.document)) {
         return;
       }
 
