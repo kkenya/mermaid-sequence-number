@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- specify CSS style by user settings
-- support mmd file
+- Specify CSS style by user settings
+
+## [1.1.0] - 2022-04-30
+
+### Added
+
+- Support mermaid file extention ( `.mm` )
 
 ## [1.0.0] - 2022-04-17
 
 ### Changed
 
-- marketplace icon and background color
-- disable preview
-
-### Added
+- Marketplace icon and background color
+- Disable preview
 
 ## [0.0.2] - 2022-04-17
 
