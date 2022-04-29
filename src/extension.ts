@@ -196,13 +196,13 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   vscode.workspace.onDidChangeTextDocument(
-    (event) => {
+    (event: vscode.TextDocumentChangeEvent) => {
       if (!isEnabled(event.document)) {
         return;
       }
 
-      const [openEditor] = vscode.window.visibleTextEditors.filter(
-        (editor) => editor.document.uri === event.document.uri
+      const openEditor = vscode.window.visibleTextEditors.find(
+        (editor) => event.document.uri === editor.document.uri
       );
       if (openEditor === undefined) {
         return;
@@ -212,6 +212,21 @@ export function activate(context: vscode.ExtensionContext) {
     null,
     context.subscriptions
   );
+
+  vscode.window.onDidChangeTextEditorSelection(
+    (event: vscode.TextEditorSelectionChangeEvent) => {
+      if (event.textEditor === vscode.window.activeTextEditor) {
+        if (!isEnabled(event.textEditor.document)) {
+          return;
+        }
+        decorate(event.textEditor);
+      }
+    },
+    null,
+    context.subscriptions
+  );
 }
 
-export function deactivate() {}
+export function deactivate() {
+  console.debug('deactivated mermaid sequence number');
+}
