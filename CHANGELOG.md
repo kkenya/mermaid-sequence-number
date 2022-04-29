@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Specify CSS style by user settings
 
+## [1.1.1] - 2022-04-30
+
+### Fixed
+
+- README.md
+
 ## [1.1.0] - 2022-04-30
 
 ### Added

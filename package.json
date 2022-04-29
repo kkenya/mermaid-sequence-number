@@ -1,6 +1,6 @@
 {
   "name": "mermaid-sequence-number",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "kkenya",
   "engines": {
     "vscode": "^1.66.0"
