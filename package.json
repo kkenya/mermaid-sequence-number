@@ -25,13 +25,15 @@
       {
         "id": "mermaid",
         "extensions": [
-          ".markdown"
+          ".markdown",
+          ".mmd"
         ]
       }
     ]
   },
   "activationEvents": [
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onLanguage:mermaid"
   ],
   "badges": [],
   "markdown": "github",
