@@ -19,11 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support mermaid file extention ( `.mm` )
+- Support mermaid file extension ( `.mm` )
 
 ### Fixed
 
-- Activate extention when editor selection did change.
+- Activate extension when editor selection did change.
 
 ## [1.0.0] - 2022-04-17
 
