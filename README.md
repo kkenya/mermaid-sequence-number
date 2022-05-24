@@ -20,5 +20,4 @@ This extension decorate each line on editor when `autonumber` is turned on in th
 ## Support
 
 - Markdown ( `.md` )
-- mermaid ( `.mm` )
-- applied to file less than equal 1000 lines
+- mermaid ( `.mmd` )
