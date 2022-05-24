@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Specify CSS style by user settings
 
+## [1.2.0] - 2022-05-24
+
+### Added
+
+- Add configuration for position of decoration and maxmum lines of file
+
 ## [1.1.1] - 2022-04-30
 
 ### Fixed
