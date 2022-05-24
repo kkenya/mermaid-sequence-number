@@ -46,7 +46,7 @@
             "before",
             "after"
           ],
-          "description": "the position of decoration",
+          "description": "Decorations are placed either before or after the message",
           "order": 10
         }
       }
