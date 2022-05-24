@@ -29,7 +29,28 @@
           ".mm"
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "mermaidSequenceNumber",
+      "properties": {
+        "mermaidSequenceNumber.maxLines": {
+          "type": "number",
+          "default": 1000,
+          "description": "The maximum number of lines",
+          "order": 0
+        },
+        "mermaidSequenceNumber.decorationPosition": {
+          "type": "string",
+          "default": "after",
+          "enum": [
+            "before",
+            "after"
+          ],
+          "description": "the position of decoration",
+          "order": 10
+        }
+      }
+    }
   },
   "activationEvents": [
     "onLanguage:markdown",
