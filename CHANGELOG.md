@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Specify CSS style by user settings
 
+## [1.2.1] - 2022-05-24
+
+### Fixed
+
+- README.md
+
+## [1.2.0] - 2022-05-24
+
+### Added
+
+- Add configuration for position of decoration and maxmum lines of file
+
 ## [1.1.1] - 2022-04-30
 
 ### Fixed
@@ -19,11 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support mermaid file extention ( `.mm` )
+- Support mermaid file extension ( `.mm` )
 
 ### Fixed
 
-- Activate extention when editor selection did change.
+- Activate extension when editor selection did change.
 
 ## [1.0.0] - 2022-04-17
 
